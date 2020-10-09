@@ -1,11 +1,14 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:tflite/tflite.dart';
+import 'package:image/image.dart' as img;
 
 class HomePage extends StatefulWidget {
   @override
@@ -34,20 +37,13 @@ class _HomePageState extends State<HomePage> {
           elevation: 2.0,
           backgroundColor: Colors.red,
           centerTitle: true,
-          title: Text("Bottle Classify",
+          title: Text("Classificador de frutas",
               style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
                   fontSize: 20.0,
                   letterSpacing: 0.3))),
-      // floatingActionButton: FloatingActionButton(
-      //   child: Icon(Icons.camera),
-      //   onPressed: () async {
-      //     final pickedFile = await picker.getImage(source: ImageSource.camera);
-      //
-      //     print(pickedFile.path);
-      //   },
-      // ),
+      // floatingActionButtonLocation: FloatingActionButtonLocation.centerTop,
       floatingActionButton: SpeedDial(
         marginRight: 18,
         marginBottom: 20,
@@ -290,6 +286,22 @@ class _HomePageState extends State<HomePage> {
         imageMean: 128.0,
         threshold: 0.40,
         numResults: 1);
+    // var imageBytes = image.readAsBytesSync();
+    // img.Image oriImage = img.decodeJpg(imageBytes);
+    // img.Image resizedImage = img.copyResize(oriImage, height: 224, width: 224);
+    //
+    // var recognitions = await Tflite.runModelOnBinary(
+    //   binary: imageToByteListFloat32(resizedImage, 224, 127.5, 127.5),
+    //   numResults: 6,
+    //   threshold: 0.05,
+    // );
+
+    // var recognitions = await Tflite.runModelOnBinary(
+    //     binary: imageToByteListFloat32(image.path, 224, 127.5, 127.5),// required
+    //     numResults: 6,    // defaults to 5
+    //     threshold: 0.05,  // defaults to 0.1
+    //     asynch: true      // defaults to true
+    // );
 
     if (recognitions.isNotEmpty) {
       Classification c = Classification(recognitions.first['confidence'],
@@ -299,6 +311,22 @@ class _HomePageState extends State<HomePage> {
     }
 
     print(recognitions.first.toString());
+  }
+
+  Uint8List imageToByteListFloat32(
+      img.Image image, int inputSize, double mean, double std) {
+    var convertedBytes = Float32List(1 * inputSize * inputSize * 3);
+    var buffer = Float32List.view(convertedBytes.buffer);
+    int pixelIndex = 0;
+    for (var i = 0; i < inputSize; i++) {
+      for (var j = 0; j < inputSize; j++) {
+        var pixel = image.getPixel(j, i);
+        buffer[pixelIndex++] = (img.getRed(pixel) - mean) / std;
+        buffer[pixelIndex++] = (img.getGreen(pixel) - mean) / std;
+        buffer[pixelIndex++] = (img.getBlue(pixel) - mean) / std;
+      }
+    }
+    return convertedBytes.buffer.asUint8List();
   }
 }
 
@@ -312,9 +340,15 @@ class Classification {
 String maskClass(int label, BuildContext context) {
   switch (label) {
     case 0:
-      return 'Aprovado';
+      return 'Abacaxi';
     case 1:
-      return 'Reprovado';
+      return 'Coco';
+    case 2:
+      return 'Limão';
+    case 3:
+      return 'Laranja';
+    case 4:
+      return 'Pera';
     default:
       return 'Aguardando aprovação';
   }
@@ -323,9 +357,15 @@ String maskClass(int label, BuildContext context) {
 Color maskClassColor(int label) {
   switch (label) {
     case 0:
-      return Colors.green;
+      return Colors.yellow;
     case 1:
-      return Colors.red;
+      return Colors.brown;
+    case 2:
+      return Colors.green;
+    case 3:
+      return Colors.orange;
+    case 4:
+      return Colors.lightGreen;
     default:
       return Colors.blue[800];
   }
@@ -333,11 +373,7 @@ Color maskClassColor(int label) {
 
 Icon maskClassIcon(int label) {
   switch (label) {
-    case 0:
-      return Icon(Icons.check_circle, color: Colors.green,);
-    case 1:
-      return Icon(Icons.close, color: Colors.red,);
     default:
-      return Icon(Icons.access_time, color: Colors.blue[800],);
+      return Icon(Icons.class_, color: Colors.blue[800],);
   }
 }
