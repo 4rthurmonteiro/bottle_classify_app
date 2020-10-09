@@ -1,16 +1,24 @@
-# bottle_classify_app
+# Fruit Classify App
 
-A new Flutter application.
+Uma aplicação em Flutter para classificar frutas.
 
-## Getting Started
+O modelo consegue classificar 5 tipos de frutas:
 
-This project is a starting point for a Flutter application.
+0 abacaxi
+1 coco
+2 limao
+3 laranja
+4 pera
 
-A few resources to get you started if this is your first Flutter project:
+Para gerar o modelo foi usado o dataset Fruits360 (https://www.kaggle.com/moltean/fruits).
 
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
+Os dados foram treinados e convertidos para o formato .tflite pela plataforma Teachable Machine (https://teachablemachine.withgoogle.com/).
 
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+
+Para rodar um modelo de machine learning no Flutter é preciso de uma biblioteca chamada tflite.
+
+## Como funciona o App
+
+O aplicativo utiliza a câmera ou a biblioteca do celular. Com a imagem em mãos ele pede para você enquadrar essa imagem, assim o modelo pode identificar com mais confiança a sua fruta. Após isso a classificação é feita e mostrada para o usuário.
+
+
